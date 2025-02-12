@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Interface</title>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #data { white-space: pre-wrap; background: #f4f4f4; padding: 10px; border: 1px solid #ccc; height: 300px; overflow-y: auto; text-align: left; }
+    </style>
+</head>
+<body>
+    <h2>ESP32 Bluetooth Interface</h2>
+    <button id="connectButton" onclick="toggleConnection()">Connect to ESP32</button>
+    <p>Status: <span id="status">Disconnected</span></p>
+    <p>Data from ESP32: <span id="espData">N/A</span></p>
+    <input type="text" id="sendData" placeholder="Enter command">
+    <button onclick="sendCommand()">Send</button>
+    
+    <h1>ESP32 Data (MQTT)</h1>
+    <p id="mqttData">Waiting for data...</p>
+    
+    <h1>COM Port Data Viewer</h1>
+    <button id="connect">Connect to COM Port</button>
+    <button id="disconnect" disabled>Disconnect</button>
+    <div id="data">Waiting for data...</div>
+
+    <script>
+        let espDevice;
+        let sensorCharacteristic;
+        let ledCharacteristic;
+        const SERVICE_UUID = "19b10000-e8f2-537e-4f6c-d104768a1214";
+        const SENSOR_CHAR_UUID = "19b10001-e8f2-537e-4f6c-d104768a1214";
+        const LED_CHAR_UUID = "19b10002-e8f2-537e-4f6c-d104768a1214";
+
+        async function toggleConnection() {
+            if (espDevice && espDevice.gatt.connected) {
+                disconnectESP32();
+            } else {
+                connectToESP32();
+            }
+        }
+
+        async function connectToESP32() {
+            try {
+                navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: [SERVICE_UUID]
+                }).then(device => {
+                    espDevice = device;
+                    document.getElementById("status").innerText = "Connecting...";
+                    return device.gatt.connect();
+                }).then(server => server.getPrimaryService(SERVICE_UUID))
+                  .then(service => Promise.all([
+                      service.getCharacteristic(SENSOR_CHAR_UUID),
+                      service.getCharacteristic(LED_CHAR_UUID)
+                  ]))
+                  .then(characteristics => {
+                      sensorCharacteristic = characteristics[0];
+                      ledCharacteristic = characteristics[1];
+                      document.getElementById("status").innerText = "Connected";
+                      document.getElementById("connectButton").innerText = "Disconnect";
+                      readSensorData();
+                  }).catch(error => {
+                      console.error(error);
+                      document.getElementById("status").innerText = "Error: " + error;
+                  });
+            } catch (error) {
+                console.error(error);
+                document.getElementById("status").innerText = "Error: " + error.message;
+            }
+        }
+
+        function disconnectESP32() {
+            if (espDevice && espDevice.gatt.connected) {
+                espDevice.gatt.disconnect();
+                document.getElementById("status").innerText = "Disconnected";
+                document.getElementById("connectButton").innerText = "Connect to ESP32";
+            }
+        }
+
+        function readSensorData() {
+            if (!sensorCharacteristic) return;
+            sensorCharacteristic.startNotifications().then(characteristic => {
+                characteristic.addEventListener('characteristicvaluechanged', event => {
+                    let value = new TextDecoder().decode(event.target.value);
+                    document.getElementById("espData").innerText = value;
+                });
+            });
+        }
+
+        function sendCommand() {
+            if (!ledCharacteristic) return;
+            let command = document.getElementById("sendData").value;
+            let encoder = new TextEncoder();
+            ledCharacteristic.writeValue(encoder.encode(command)).then(() => {
+                console.log("Command sent: ", command);
+            }).catch(error => {
+                console.error("Failed to send command", error);
+            });
+        }
+
+        // MQTT Integration
+        const broker = "wss://mqtt-dashboard.com:8884/mqtt";
+        const topic = "TESTEST";
+        
+        const options = {
+            clientId: "client-" + Math.random().toString(16).substr(2, 8),
+            clean: true,
+        };
+
+        const client = mqtt.connect(broker, options);
+
+        client.on("connect", function () {
+            console.log("Connected to MQTT Broker");
+            client.subscribe(topic, function (err) {
+                if (!err) {
+                    console.log("Subscribed to topic:", topic);
+                } else {
+                    console.error("Subscription error:", err);
+                }
+            });
+        });
+
+        client.on("message", function (topic, message) {
+            console.log("Received message:", message.toString());
+            document.getElementById("mqttData").innerText = message.toString();
+        });
+
+        client.on("error", function (err) {
+            console.error("Connection error:", err);
+        });
+
+        // Serial Communication
+        let port;
+        let reader;
+        let decoder = new TextDecoder();
+        let keepReading = false;
+
+        document.getElementById('connect').addEventListener('click', async () => {
+            try {
+                port = await navigator.serial.requestPort();
+                await port.open({ baudRate: 115200 });
+                document.getElementById('data').textContent = "Connected. Waiting for data...";
+                document.getElementById('connect').disabled = true;
+                document.getElementById('disconnect').disabled = false;
+                keepReading = true;
+                readSerialData();
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById('data').textContent = "Error connecting to COM port.";
+            }
+        });
+
+        async function readSerialData() {
+            reader = port.readable.getReader();
+            let buffer = "";
+            try {
+                while (keepReading) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    let dataString = decoder.decode(value, { stream: true });
+                    dataString = dataString.replace(/[^                     dataString = dataString.replace(/[^\x20-\x7E\r\n]/g, '');
+                    buffer += dataString;
+                    document.getElementById('data').textContent = buffer;
+                    document.getElementById('data').scrollTop = document.getElementById('data').scrollHeight;
+                }
+            } catch (error) {
+                console.error("Read error:", error);
+            }
+        }
+    </script>
+</body>
+</html>
