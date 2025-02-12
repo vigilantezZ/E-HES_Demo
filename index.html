@@ -77,10 +77,39 @@
 
         .section {
             margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Styling for each section */
+        .bluetooth-section {
+            background-color: #e0f7fa;
+        }
+
+        .mqtt-section {
+            background-color: #e8f5e9;
+        }
+
+        .comport-section {
+            background-color: #f3e5f5;
         }
 
         .section h2 {
             margin-bottom: 15px;
+        }
+
+        .section p {
+            margin-bottom: 10px;
+        }
+
+        .section button {
+            width: 200px;
+            margin: 5px;
+        }
+
+        .section input[type="text"] {
+            width: 300px;
         }
     </style>
 </head>
@@ -89,7 +118,7 @@
         <h1>E-HES Live Demo</h1>
 
         <!-- Bluetooth Section -->
-        <div class="section">
+        <div class="section bluetooth-section">
             <h2>Bluetooth Interface</h2>
             <button id="connectButton" onclick="toggleConnection()">Connect</button>
             <p>Status: <span id="status">Disconnected</span></p>
@@ -99,13 +128,13 @@
         </div>
 
         <!-- MQTT Section -->
-        <div class="section">
+        <div class="section mqtt-section">
             <h2>MQTT Data Receive</h2>
             <p id="mqttData">Waiting for data...</p>
         </div>
 
         <!-- Serial Communication Section -->
-        <div class="section">
+        <div class="section comport-section">
             <h2>COM Port Data Viewer</h2>
             <button id="connect">Connect to COM Port</button>
             <button id="disconnect" disabled>Disconnect</button>
@@ -242,44 +271,34 @@
         });
 
         async function readSerialData() {
-			reader = port.readable.getReader();
-			let buffer = "";
-			try {
-				while (keepReading) {
-					const { value, done } = await reader.read();
-					if (done) break;
+            reader = port.readable.getReader();
+            let buffer = "";
+            try {
+                while (keepReading) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
 
-					let dataString = decoder.decode(value, { stream: true });
-					// Append the new data to the buffer
-					buffer += dataString;
+                    let dataString = decoder.decode(value, { stream: true });
+                    buffer += dataString;
 
-					// Split the buffer into lines based on the newline character
-					let lines = buffer.split("\n");
+                    let lines = buffer.split("\n");
+                    document.getElementById('data').textContent = lines.join("\n");
+                    document.getElementById('data').scrollTop = document.getElementById('data').scrollHeight;
+                    buffer = lines[lines.length - 1];
+                }
+            } catch (error) {
+                console.error("Read error:", error);
+            }
+        }
 
-					// Update the display with each line
-					document.getElementById('data').textContent = lines.join("\n");
-
-					// Scroll to the bottom to show the latest line
-					document.getElementById('data').scrollTop = document.getElementById('data').scrollHeight;
-
-					// Keep the remaining part of the buffer that isn't a full line
-					buffer = lines[lines.length - 1];
-				}
-			} catch (error) {
-				console.error("Read error:", error);
-			}
-		}
-
-
-        // Disconnect the serial port
         document.getElementById('disconnect').addEventListener('click', async () => {
             try {
-                keepReading = false; // Stop reading the serial port data
+                keepReading = false;
                 if (reader) {
-                    reader.releaseLock(); // Release the lock on the reader
+                    reader.releaseLock();
                 }
                 if (port) {
-                    await port.close(); // Close the serial port
+                    await port.close();
                 }
                 document.getElementById('data').textContent = "Disconnected.";
                 document.getElementById('connect').disabled = false;
