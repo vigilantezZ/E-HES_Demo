@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32 Interface</title>
+    <title>E-HES Demo</title>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
         body {
@@ -86,21 +86,21 @@
 </head>
 <body>
     <div class="container">
-        <h1>ESP32 Bluetooth & MQTT Interface</h1>
+        <h1>E-HES Live Demo</h1>
 
         <!-- Bluetooth Section -->
         <div class="section">
-            <h2>ESP32 Bluetooth Interface</h2>
-            <button id="connectButton" onclick="toggleConnection()">Connect to ESP32</button>
+            <h2>Bluetooth Interface</h2>
+            <button id="connectButton" onclick="toggleConnection()">Connect</button>
             <p>Status: <span id="status">Disconnected</span></p>
-            <p>Data from ESP32: <span id="espData">N/A</span></p>
+            <p>Received Data: <span id="espData">N/A</span></p>
             <input type="text" id="sendData" placeholder="Enter command">
             <button onclick="sendCommand()">Send Command</button>
         </div>
 
         <!-- MQTT Section -->
         <div class="section">
-            <h2>ESP32 Data (MQTT)</h2>
+            <h2>MQTT Data Receive</h2>
             <p id="mqttData">Waiting for data...</p>
         </div>
 
@@ -109,7 +109,7 @@
             <h2>COM Port Data Viewer</h2>
             <button id="connect">Connect to COM Port</button>
             <button id="disconnect" disabled>Disconnect</button>
-            <div id="data">Waiting for data...</div>
+            <div id="data">Please Connect First</div>
         </div>
     </div>
 
