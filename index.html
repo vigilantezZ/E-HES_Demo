@@ -6,27 +6,115 @@
     <title>ESP32 Interface</title>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        #data { white-space: pre-wrap; background: #f4f4f4; padding: 10px; border: 1px solid #ccc; height: 300px; overflow-y: auto; text-align: left; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1, h2 {
+            color: #444;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 200px;
+            margin-right: 10px;
+        }
+
+        #data, #mqttData, #espData {
+            background: #f4f4f4;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 10px;
+            text-align: left;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+        }
+
+        #status {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
-    <h2>ESP32 Bluetooth Interface</h2>
-    <button id="connectButton" onclick="toggleConnection()">Connect to ESP32</button>
-    <p>Status: <span id="status">Disconnected</span></p>
-    <p>Data from ESP32: <span id="espData">N/A</span></p>
-    <input type="text" id="sendData" placeholder="Enter command">
-    <button onclick="sendCommand()">Send</button>
-    
-    <h1>ESP32 Data (MQTT)</h1>
-    <p id="mqttData">Waiting for data...</p>
-    
-    <h1>COM Port Data Viewer</h1>
-    <button id="connect">Connect to COM Port</button>
-    <button id="disconnect" disabled>Disconnect</button>
-    <div id="data">Waiting for data...</div>
+    <div class="container">
+        <h1>ESP32 Bluetooth & MQTT Interface</h1>
+
+        <!-- Bluetooth Section -->
+        <div class="section">
+            <h2>ESP32 Bluetooth Interface</h2>
+            <button id="connectButton" onclick="toggleConnection()">Connect to ESP32</button>
+            <p>Status: <span id="status">Disconnected</span></p>
+            <p>Data from ESP32: <span id="espData">N/A</span></p>
+            <input type="text" id="sendData" placeholder="Enter command">
+            <button onclick="sendCommand()">Send Command</button>
+        </div>
+
+        <!-- MQTT Section -->
+        <div class="section">
+            <h2>ESP32 Data (MQTT)</h2>
+            <p id="mqttData">Waiting for data...</p>
+        </div>
+
+        <!-- Serial Communication Section -->
+        <div class="section">
+            <h2>COM Port Data Viewer</h2>
+            <button id="connect">Connect to COM Port</button>
+            <button id="disconnect" disabled>Disconnect</button>
+            <div id="data">Waiting for data...</div>
+        </div>
+    </div>
 
     <script>
+        // JavaScript code remains the same as in your original file
         let espDevice;
         let sensorCharacteristic;
         let ledCharacteristic;
@@ -161,7 +249,7 @@
                     const { value, done } = await reader.read();
                     if (done) break;
                     let dataString = decoder.decode(value, { stream: true });
-                    dataString = dataString.replace(/[^                     dataString = dataString.replace(/[^\x20-\x7E\r\n]/g, '');
+                    dataString = dataString.replace(/[^\x20-\x7E\r\n]/g, '');
                     buffer += dataString;
                     document.getElementById('data').textContent = buffer;
                     document.getElementById('data').scrollTop = document.getElementById('data').scrollHeight;
