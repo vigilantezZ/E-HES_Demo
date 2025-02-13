@@ -14,11 +14,11 @@
             padding: 20px;
             text-align: center;
         }
-    
+
         h1, h2 {
             color: #444;
         }
-    
+
         .container {
             max-width: 800px;
             margin: 0 auto;
@@ -27,7 +27,7 @@
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-    
+
         button {
             background-color: #007bff;
             color: white;
@@ -39,16 +39,16 @@
             font-size: 16px;
             transition: background-color 0.3s ease;
         }
-    
+
         button:hover {
             background-color: #0056b3;
         }
-    
+
         button:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
         }
-    
+
         input[type="text"] {
             padding: 10px;
             border: 1px solid #ccc;
@@ -56,7 +56,7 @@
             width: 200px;
             margin-right: 10px;
         }
-    
+
         #data, #mqttData, #espData {
             background: #f4f4f4;
             padding: 15px;
@@ -69,68 +69,47 @@
             font-family: 'Courier New', Courier, monospace;
             font-size: 14px;
         }
-    
+
         #status {
             font-weight: bold;
             color: #007bff;
         }
-    
+
         .section {
             margin-bottom: 30px;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-    
+
         /* Styling for each section */
         .bluetooth-section {
             background-color: #e0f7fa;
         }
-    
+
         .mqtt-section {
             background-color: #e8f5e9;
         }
-    
+
         .comport-section {
             background-color: #f3e5f5;
         }
-    
+
         .section h2 {
             margin-bottom: 15px;
         }
-    
+
         .section p {
             margin-bottom: 10px;
         }
-    
+
         .section button {
             width: 200px;
             margin: 5px;
         }
-    
+
         .section input[type="text"] {
             width: 300px;
-        }
-    
-        /* Media query for smaller screens */
-        @media (max-width: 600px) {
-            .container {
-                padding: 10px;
-            }
-    
-            .section {
-                padding: 15px;
-            }
-    
-            input[type="text"] {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-    
-            button {
-                width: 100%;
-                margin: 5px 0;
-            }
         }
     </style>
 </head>
@@ -240,8 +219,7 @@
         }
 
         // MQTT Integration
-        // const broker = "wss://mqtt-dashboard.com:8884/mqtt";
-        const broker = "da8efe0eeddc4dc589baa8bd8efb56bc.s1.eu.hivemq.cloud:8884/mqtt"
+        const broker = "wss://mqtt-dashboard.com:8884/mqtt";
         const topic = "TESTEST";
         
         const options = {
